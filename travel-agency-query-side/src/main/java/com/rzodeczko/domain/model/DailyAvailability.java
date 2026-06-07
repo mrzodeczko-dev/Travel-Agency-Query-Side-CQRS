@@ -5,11 +5,11 @@ import java.time.LocalDate;
 public class DailyAvailability {
     private final long hotelId;
     private final LocalDate date;
-    private final int occupied;
-    private final int capacity;
+    private final long occupied;
+    private final long capacity;
     private final AvailabilityStatus status;
 
-    public DailyAvailability(long hotelId, LocalDate date, int occupied, int capacity, AvailabilityStatus status) {
+    public DailyAvailability(long hotelId, LocalDate date, long occupied, long capacity, AvailabilityStatus status) {
 
         if (occupied < 0) {
             throw new IllegalArgumentException("Occupied cannot be negative");
@@ -30,7 +30,7 @@ public class DailyAvailability {
         this.status = status;
     }
 
-    public int freeRooms() {
+    public long freeRooms() {
         return Math.max(0, capacity - occupied);
     }
 
@@ -42,11 +42,11 @@ public class DailyAvailability {
         return date;
     }
 
-    public int getOccupied() {
+    public long getOccupied() {
         return occupied;
     }
 
-    public int getCapacity() {
+    public long getCapacity() {
         return capacity;
     }
 

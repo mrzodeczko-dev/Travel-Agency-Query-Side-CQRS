@@ -45,7 +45,6 @@ public class AvailabilityService implements UpdateAvailabilityUseCase, GetAvaila
                 status
         );
 
-        // UPSERT do Read Modelu
         availabilityWriteRepository.upsert(availability);
     }
 

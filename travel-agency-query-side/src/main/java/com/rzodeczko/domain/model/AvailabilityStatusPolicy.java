@@ -7,7 +7,7 @@ public record AvailabilityStatusPolicy(double lastRoomsThreshold) {
         }
     }
 
-    public AvailabilityStatus evaluate(int occupied, int capacity) {
+    public AvailabilityStatus evaluate(long occupied, long capacity) {
         if (occupied >= capacity) {
             return AvailabilityStatus.SOLD_OUT;
         }
