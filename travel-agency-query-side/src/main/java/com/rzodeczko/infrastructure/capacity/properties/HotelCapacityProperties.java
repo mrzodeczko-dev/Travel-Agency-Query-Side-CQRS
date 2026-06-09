@@ -1,4 +1,4 @@
-package com.rzodeczko.infrastructure.capacity.properteis;
+package com.rzodeczko.infrastructure.capacity.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

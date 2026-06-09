@@ -1,7 +1,7 @@
 package com.rzodeczko.infrastructure.capacity;
 
 import com.rzodeczko.application.port.out.HotelCapacityProvider;
-import com.rzodeczko.infrastructure.capacity.properteis.HotelCapacityProperties;
+import com.rzodeczko.infrastructure.capacity.properties.HotelCapacityProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

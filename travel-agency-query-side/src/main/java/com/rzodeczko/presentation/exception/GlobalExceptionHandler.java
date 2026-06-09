@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidDateRangeException.class)
     public ResponseEntity<ErrorResponseDto> handleInvalidDateRange(InvalidDateRangeException e) {
-        log.error("Invalid date range", e);
+        log.warn("Invalid date range", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(e.getMessage()));
     }
 
