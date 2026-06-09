@@ -1,0 +1,146 @@
+services:
+  mongodb:
+    image: mongo:8.3.1
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+    ports:
+      - '${MONGO_PORT}:27017'
+    volumes:
+      - mongodb:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    networks:
+      - mr-network
+
+  # --------------------------------------------------------------------------------------------------------------------
+  # KAFKA
+  # --------------------------------------------------------------------------------------------------------------------
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-single
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    env_file:
+      - .env
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "kafka-topics --bootstrap-server localhost:9092 --list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - mr-network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.0
+    container_name: schema-registry
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8200:8200"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8200
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8200/subjects" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - mr-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:0.3.3
+    container_name: kafka-ui
+    ports:
+      - "8100:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=kraft-cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_ENABLED=false
+      - KAFKA_CLUSTERS_0_SCHEMAREGISTRY=http://schema-registry:8200
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    networks:
+      - mr-network
+
+  travel-agency-query-side:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: on-failure:10
+    ports:
+      - "${QUERY_SIDE_SERVICE_PORT}:8081"
+    volumes:
+      - kafka-streams-state:/var/lib/travel-agency-query-side/kafka-streams
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${QUERY_SIDE_SERVICE_PORT}
+      SPRING_APPLICATION_NAME: ${QUERY_SIDE_SERVICE_APPLICATION_NAME}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27017/${MONGO_DB_NAME}?authSource=admin
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8200
+      DEFAULT_HOTEL_CAPACITY: ${QUERY_SIDE_DEFAULT_HOTEL_CAPACITY}
+      KAFKA_STREAMS_APPLICATION_ID: ${KAFKA_STREAMS_APPLICATION_ID}
+      KAFKA_STREAMS_THREADS: ${KAFKA_STREAMS_THREADS}
+      KAFKA_STREAMS_STATE_DIR: ${KAFKA_STREAMS_STATE_DIR}
+      KAFKA_PROJECTION_GROUP_ID: ${KAFKA_PROJECTION_GROUP_ID}
+      HOTELS_CONSUMER_GROUP: ${HOTELS_CONSUMER_GROUP}
+      TOPIC_BOOKINGS: ${TOPIC_BOOKINGS}
+      TOPIC_AVAILABILITY: ${TOPIC_AVAILABILITY}
+      TOPIC_AVAILABILITY_DLT: ${TOPIC_AVAILABILITY_DLT}
+      TOPIC_HOTELS: ${TOPIC_HOTELS}
+      TOPIC_HOTELS_DLT: ${TOPIC_HOTELS_DLT}
+      LAST_ROOMS_THRESHOLD: ${QUERY_SIDE_LAST_ROOMS_THRESHOLD}
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "1.0"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    networks:
+      - mr-network
+
+volumes:
+  mongodb:
+  kafka-data:
+  kafka-streams-state:
+
+networks:
+  mr-network:

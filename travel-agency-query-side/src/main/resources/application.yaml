@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT}
 
 spring:
   application:
@@ -16,14 +16,14 @@ spring:
       auto-index-creation: true
 
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     properties:
-      schema.registry.url: ${SPRING_KAFKA_SCHEMA_REGISTRY_URL}
+      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
     streams:
       application-id: ${KAFKA_STREAMS_APPLICATION_ID}
       properties:
         processing.guarantee: exactly_once_v2
-        schema.registry.url: ${SPRING_KAFKA_SCHEMA_REGISTRY_URL}
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
         num.stream.threads: ${KAFKA_STREAMS_THREADS}
         state.dir: ${KAFKA_STREAMS_STATE_DIR}
         default.deserialization.exception.handler: org.apache.kafka.streams.errors.LogAndContinueExceptionHandler
@@ -36,7 +36,7 @@ spring:
         spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
         spring.deserializer.value.delegate.class: io.confluent.kafka.serializers.KafkaAvroDeserializer
         specific.avro.reader: true
-        schema.registry.url: ${SPRING_KAFKA_SCHEMA_REGISTRY_URL}
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
     listener:
       ack-mode: record
 
@@ -49,7 +49,7 @@ app:
     hotels-dlt: ${TOPIC_HOTELS_DLT}
   last-rooms-threshold: ${LAST_ROOMS_THRESHOLD}
   hotels:
-    default-capacity: ${DEFAULT_HOTEL_CAPACITY}
+    default-capacity: ${DEFAULT_HOTEL_CAPACITY} # Fallback capacity for hotels without availability information
     consumer-group: ${HOTELS_CONSUMER_GROUP}
 
 management:

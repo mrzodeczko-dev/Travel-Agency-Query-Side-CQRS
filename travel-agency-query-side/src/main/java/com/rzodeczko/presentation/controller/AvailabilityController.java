@@ -3,6 +3,7 @@ package com.rzodeczko.presentation.controller;
 import com.rzodeczko.application.port.in.GetAvailabilityUseCase;
 import com.rzodeczko.domain.model.Availability;
 import com.rzodeczko.presentation.dto.AvailabilityResponseDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +13,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/availability")
-@RequestMapping
+@RequiredArgsConstructor
 public class AvailabilityController {
     private final GetAvailabilityUseCase getAvailabilityUseCase;
-
 
     @GetMapping("/{hotelId}")
     public ResponseEntity<List<AvailabilityResponseDto>> getAvailability(

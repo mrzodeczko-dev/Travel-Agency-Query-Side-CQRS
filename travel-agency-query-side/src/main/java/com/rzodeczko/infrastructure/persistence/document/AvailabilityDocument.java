@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Document(collation = "daily_availability")
+@Document(collection = "daily_availability")
 @Getter
 @Setter
 @Builder

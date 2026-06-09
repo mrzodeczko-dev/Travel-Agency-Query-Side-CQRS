@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class BeansConfiguration {
 
     @Bean
-    public AvailabilityStatusPolicy availabilityStatusPolicy(@Value("${app.last-rooms-threshold:0.9") double lastRoomsThreshold) {
+    public AvailabilityStatusPolicy availabilityStatusPolicy(@Value("${app.last-rooms-threshold:0.9}") double lastRoomsThreshold) {
         return new AvailabilityStatusPolicy(lastRoomsThreshold);
     }
 

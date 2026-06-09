@@ -13,7 +13,7 @@ public class KafkaTopicsConfig {
     private final AppTopicsProperties topics;
 
     @Bean
-    public NewTopic dailyAvailabilityTopic() {
+    public NewTopic availabilityTopic() {
         return TopicBuilder
                 .name(topics.availability())
                 .partitions(3)
@@ -22,7 +22,7 @@ public class KafkaTopicsConfig {
     }
 
     @Bean
-    public NewTopic dailyAvailabilityDltTopic() {
+    public NewTopic availabilityDltTopic() {
         return TopicBuilder
                 .name(topics.availabilityDlt())
                 .partitions(3)

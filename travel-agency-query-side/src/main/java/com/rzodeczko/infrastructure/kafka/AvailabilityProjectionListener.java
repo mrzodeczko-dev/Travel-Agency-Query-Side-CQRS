@@ -17,7 +17,7 @@ public class AvailabilityProjectionListener {
     private final UpdateAvailabilityUseCase updateAvailabilityUseCase;
 
     @KafkaListener(
-            topics = "${app.topics.daily-availability}",
+            topics = "${app.topics.availability}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void onAvailabilityUpdated(AvailabilityUpdatedAvro event) {

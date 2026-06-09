@@ -53,7 +53,7 @@ public class MongoHotelCapacityProvider implements HotelCapacityProvider, HotelC
     }
 
     @Override
-    public void save(long hotelId, int capacity) {
+    public void save(long hotelId, long capacity) {
         hotelRepository.save(HotelDocument.builder().id(hotelId).capacity(capacity).build());
         cache.put(hotelId, capacity);
     }

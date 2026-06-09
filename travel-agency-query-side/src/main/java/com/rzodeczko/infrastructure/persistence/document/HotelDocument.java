@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collation = "hotels")
+@Document(collection = "hotels")
 @Getter
 @Setter
 @Builder

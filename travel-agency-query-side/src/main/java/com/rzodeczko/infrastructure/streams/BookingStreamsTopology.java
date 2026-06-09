@@ -30,7 +30,7 @@ public class BookingStreamsTopology {
     private String schemaRegistryUrl;
 
     @Bean
-    public KStream<String, AvailabilityUpdatedAvro> dailyAvailabilityTopology(StreamsBuilder builder) {
+    public KStream<String, AvailabilityUpdatedAvro> availabilityTopology(StreamsBuilder builder) {
         SpecificAvroSerde<BookingCreatedAvro> bookingSerde = new SpecificAvroSerde<>();
         bookingSerde.configure(Map.of("schema.registry.url", schemaRegistryUrl), false);
 
