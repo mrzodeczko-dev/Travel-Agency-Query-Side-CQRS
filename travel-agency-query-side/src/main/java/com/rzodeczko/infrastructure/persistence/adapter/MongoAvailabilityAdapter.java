@@ -7,14 +7,18 @@ import com.rzodeczko.infrastructure.persistence.document.AvailabilityDocument;
 import com.rzodeczko.infrastructure.persistence.mapper.AvailabilityDocumentMapper;
 import com.rzodeczko.infrastructure.persistence.repository.MongoDailyAvailabilityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Window;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
@@ -48,7 +52,7 @@ public class MongoAvailabilityAdapter implements
                 .set("occupied", availability.getOccupied())
                 .set("capacity", availability.getCapacity())
                 .set("status", availability.getStatus())
-                .set("updatedAt", System.currentTimeMillis());
+                .set("updatedAt", Instant.now());
 
         mongoTemplate.upsert(query, update, AvailabilityDocument.class);
     }

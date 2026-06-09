@@ -3,10 +3,12 @@ package com.rzodeczko.infrastructure.capacity;
 import com.rzodeczko.application.port.out.HotelCapacityProvider;
 import com.rzodeczko.infrastructure.capacity.properteis.HotelCapacityProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Qualifier("configHotelCapacityProvider")
 public class ConfigHotelCapacityProvider implements HotelCapacityProvider {
     private final HotelCapacityProperties properties;
 

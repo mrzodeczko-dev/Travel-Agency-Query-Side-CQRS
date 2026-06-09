@@ -1,4 +1,4 @@
-package com.rzodeczko.infrastructure.configuration.properties;
+package com.rzodeczko.infrastructure.configuration;
 
 import com.rzodeczko.application.port.out.AvailabilityReadRepository;
 import com.rzodeczko.application.port.out.AvailabilityWriteRepository;
