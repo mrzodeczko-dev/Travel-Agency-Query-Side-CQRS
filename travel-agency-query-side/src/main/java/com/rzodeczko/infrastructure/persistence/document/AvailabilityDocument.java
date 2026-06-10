@@ -3,13 +3,15 @@ package com.rzodeczko.infrastructure.persistence.document;
 import com.rzodeczko.domain.model.AvailabilityStatus;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Document(collection = "daily_availability")
+@Document(collection = "availability")
+@CompoundIndex(name = "availability_hotelId_date", def = "{'hotelId': 1, 'date': 1}", unique = true)
 @Getter
 @Setter
 @Builder
@@ -20,7 +22,7 @@ public class AvailabilityDocument {
     @Id
     private String id;
 
-    @Indexed
+    @Indexed(name = "availability_hotelId")
     private long hotelId;
 
     private LocalDate date;
