@@ -1,0 +1,58 @@
+server:
+  port: 0
+
+spring:
+  mongodb:
+    uri: mongodb://localhost:27017/test  # overridden by @DynamicPropertySource at runtime
+    database: test
+  data:
+    mongodb:
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: localhost:9092  # overridden by @EmbeddedKafka at runtime
+    properties:
+      schema.registry.url: mock://integration-test
+    streams:
+      application-id: test-travel-agency-streams
+      cleanup:
+        on-startup: true
+      properties:
+        processing.guarantee: exactly_once_v2
+        schema.registry.url: mock://integration-test
+        num.stream.threads: 1
+        state.dir: ${java.io.tmpdir}/kafka-streams-integration-test-${random.uuid}
+        default.deserialization.exception.handler: org.apache.kafka.streams.errors.LogAndContinueExceptionHandler
+    consumer:
+      group-id: test-projection-group
+      auto-offset-reset: earliest
+      properties:
+        key.deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+        value.deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: io.confluent.kafka.serializers.KafkaAvroDeserializer
+        specific.avro.reader: true
+        schema.registry.url: mock://integration-test
+    listener:
+      ack-mode: record
+
+app:
+  topics:
+    bookings: travel.bookings
+    availability: travel.availability
+    availability-dlt: travel.availability.DLT
+    hotels: travel.hotels
+    hotels-dlt: travel.hotels.DLT
+  last-rooms-threshold: 0.9
+  hotels:
+    default-capacity: 100
+    consumer-group: test-hotels-group
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when_authorized
