@@ -2,6 +2,7 @@ package com.rzodeczko.presentation.exception;
 
 import com.rzodeczko.domain.exception.AvailabilityNotFoundException;
 import com.rzodeczko.presentation.dto.ErrorResponseDto;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -25,6 +27,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleInvalidDateRange(InvalidDateRangeException e) {
         log.warn("Invalid date range", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(e.getMessage()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleConstraintViolation(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(new ErrorResponseDto(message));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -125,16 +125,41 @@ class AvailabilityControllerTest {
     }
 
     @Test
-    void shouldCapSizeAt100() throws Exception {
+    void shouldReturnBadRequestWhenSizeExceeds100() throws Exception {
+        mockMvc.perform(get("/api/availability/{hotelId}", HOTEL_ID)
+                        .param("size", "101"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(getAvailabilityUseCase);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenSizeIsZero() throws Exception {
+        mockMvc.perform(get("/api/availability/{hotelId}", HOTEL_ID)
+                        .param("size", "0"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(getAvailabilityUseCase);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenPageIsNegative() throws Exception {
+        mockMvc.perform(get("/api/availability/{hotelId}", HOTEL_ID)
+                        .param("page", "-1"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(getAvailabilityUseCase);
+    }
+
+    @Test
+    void shouldAcceptMaxAllowedSize() throws Exception {
         when(getAvailabilityUseCase.getForHotel(HOTEL_ID, null, null, 0, 100)).thenReturn(List.of());
         when(getAvailabilityUseCase.countForHotel(HOTEL_ID, null, null)).thenReturn(0L);
 
         mockMvc.perform(get("/api/availability/{hotelId}", HOTEL_ID)
-                        .param("size", "500"))
+                        .param("size", "100"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(100));
-
-        verify(getAvailabilityUseCase).getForHotel(HOTEL_ID, null, null, 0, 100);
     }
 
     @Test
