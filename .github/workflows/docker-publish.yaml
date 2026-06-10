@@ -40,6 +40,7 @@ jobs:
           context: ./travel-agency-query-side
           file: ./travel-agency-query-side/Dockerfile
           push: true
+          provenance: false
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/travel-agency-query-side:${{ inputs.version }}
             ${{ vars.DOCKERHUB_USERNAME }}/travel-agency-query-side:latest
