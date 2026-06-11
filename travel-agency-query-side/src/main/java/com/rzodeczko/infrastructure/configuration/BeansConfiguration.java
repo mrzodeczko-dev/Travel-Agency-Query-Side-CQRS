@@ -3,6 +3,7 @@ package com.rzodeczko.infrastructure.configuration;
 import com.rzodeczko.application.port.out.AvailabilityReadRepository;
 import com.rzodeczko.application.port.out.AvailabilityWriteRepository;
 import com.rzodeczko.application.port.out.HotelCapacityProvider;
+import com.rzodeczko.application.port.out.HotelCapacityReadRepository;
 import com.rzodeczko.application.port.out.HotelCapacityWriteRepository;
 import com.rzodeczko.application.service.AvailabilityService;
 import com.rzodeczko.application.service.HotelCapacityService;
@@ -36,12 +37,14 @@ public class BeansConfiguration {
     @Bean
     public HotelCapacityService hotelCapacityProvider(
             HotelCapacityWriteRepository capacityWriteRepository,
+            HotelCapacityReadRepository capacityReadRepository,
             AvailabilityReadRepository readRepository,
             AvailabilityWriteRepository writeRepository,
             AvailabilityStatusPolicy availabilityStatusPolicy
     ) {
         return new HotelCapacityService(
                 capacityWriteRepository,
+                capacityReadRepository,
                 readRepository,
                 writeRepository,
                 availabilityStatusPolicy);

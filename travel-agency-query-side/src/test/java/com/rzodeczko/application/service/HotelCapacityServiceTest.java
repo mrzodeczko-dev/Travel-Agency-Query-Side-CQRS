@@ -2,6 +2,7 @@ package com.rzodeczko.application.service;
 
 import com.rzodeczko.application.port.out.AvailabilityReadRepository;
 import com.rzodeczko.application.port.out.AvailabilityWriteRepository;
+import com.rzodeczko.application.port.out.HotelCapacityReadRepository;
 import com.rzodeczko.application.port.out.HotelCapacityWriteRepository;
 import com.rzodeczko.domain.model.Availability;
 import com.rzodeczko.domain.model.AvailabilityStatus;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +27,8 @@ class HotelCapacityServiceTest {
 
     @Mock
     private HotelCapacityWriteRepository capacityWriteRepository;
+    @Mock
+    private HotelCapacityReadRepository capacityReadRepository;
     @Mock
     private AvailabilityReadRepository readRepository;
     @Mock
@@ -37,7 +41,7 @@ class HotelCapacityServiceTest {
     @BeforeEach
     void setUp() {
         AvailabilityStatusPolicy policy = new AvailabilityStatusPolicy(0.9);
-        service = new HotelCapacityService(capacityWriteRepository, readRepository, writeRepository, policy);
+        service = new HotelCapacityService(capacityWriteRepository, capacityReadRepository, readRepository, writeRepository, policy);
     }
 
     @SuppressWarnings("unchecked")
@@ -103,6 +107,25 @@ class HotelCapacityServiceTest {
         service.upsert(HOTEL_ID, 150L);
 
         verify(writeRepository, times(3)).upsert(any());
+    }
+
+    @Test
+    void getCapacity_existingHotel_returnsCapacity() {
+        when(capacityReadRepository.findCapacity(HOTEL_ID)).thenReturn(OptionalLong.of(200L));
+
+        OptionalLong result = service.getCapacity(HOTEL_ID);
+
+        assertThat(result).isPresent();
+        assertThat(result.getAsLong()).isEqualTo(200L);
+    }
+
+    @Test
+    void getCapacity_nonExistentHotel_returnsEmpty() {
+        when(capacityReadRepository.findCapacity(999L)).thenReturn(OptionalLong.empty());
+
+        OptionalLong result = service.getCapacity(999L);
+
+        assertThat(result).isEmpty();
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import com.rzodeczko.application.port.out.HotelCapacityProvider;
+import com.rzodeczko.application.port.out.HotelCapacityReadRepository;
 import com.rzodeczko.application.port.out.HotelCapacityWriteRepository;
 import com.rzodeczko.infrastructure.persistence.document.HotelDocument;
 import com.rzodeczko.infrastructure.persistence.repository.MongoHotelRepository;
@@ -13,12 +14,13 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.OptionalLong;
 
 
 @Component
 @Primary
 @Slf4j
-public class MongoHotelCapacityProvider implements HotelCapacityProvider, HotelCapacityWriteRepository {
+public class MongoHotelCapacityProvider implements HotelCapacityProvider, HotelCapacityReadRepository, HotelCapacityWriteRepository {
     private final MongoHotelRepository hotelRepository;
     private final HotelCapacityProvider fallback;
 
@@ -55,6 +57,13 @@ public class MongoHotelCapacityProvider implements HotelCapacityProvider, HotelC
                     );
                     return fallbackCapacity;
                 });
+    }
+
+    @Override
+    public OptionalLong findCapacity(long hotelId) {
+        return hotelRepository.findById(hotelId)
+                .map(doc -> OptionalLong.of(doc.getCapacity()))
+                .orElse(OptionalLong.empty());
     }
 
     @Override
