@@ -4,6 +4,8 @@
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
 [![Kafka](https://img.shields.io/badge/Apache%20Kafka-Streams-black.svg)](https://kafka.apache.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Read%20Model-green.svg)](https://www.mongodb.com/)
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Tracing-7B61FF.svg?logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
+[![Caffeine](https://img.shields.io/badge/Caffeine-Cache-6F4E37.svg)](https://github.com/ben-manes/caffeine)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 [![CI](https://github.com/mrzodeczko-dev/Travel-Agency-Query-Side-CQRS/actions/workflows/ci.yml/badge.svg)](https://github.com/mrzodeczko-dev/Travel-Agency-Query-Side-CQRS/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -337,7 +339,7 @@ graph TD
 
 ### Hotel capacity fallback
 
-`MongoHotelCapacityProvider` is the primary `HotelCapacityProvider`. It uses an in-memory `ConcurrentHashMap` as a first-level cache over MongoDB. If the hotel has no record in the read model yet (not yet received a `HotelUpserted` event), it falls back to `ConfigHotelCapacityProvider`, which returns a configurable default capacity. This prevents failures when availability events arrive before the hotel record.
+`MongoHotelCapacityProvider` is the primary `HotelCapacityProvider`. It uses a **Caffeine cache** (max 10 000 entries, 30-minute TTL) as a first-level cache over MongoDB. If the hotel has no record in the read model yet (not yet received a `HotelUpserted` event), it falls back to `ConfigHotelCapacityProvider`, which returns a configurable default capacity. This prevents failures when availability events arrive before the hotel record.
 
 ---
 
@@ -353,6 +355,8 @@ graph TD
 - **Kafka Streams fault tolerance** — uncaught thread exceptions trigger `REPLACE_THREAD` recovery, keeping the streams processing alive without a full restart.
 - **Hotel capacity re-projection** — when a hotel's capacity changes, all existing availability records are recalculated with the new capacity and updated availability status, ensuring the read model stays consistent.
 - **Deterministic MongoDB document IDs** — availability documents use `hotel_{id}_{date}` as `_id`, making upserts idempotent with no risk of duplicates on reprocessing.
+- **Caffeine L1 cache** — `MongoHotelCapacityProvider` keeps a Caffeine cache (max 10k entries, 30-min TTL) in front of MongoDB, reducing read latency for hotel capacity lookups during availability projection.
+- **OpenTelemetry integration** — distributed tracing and metrics export via OTLP (`spring-boot-starter-opentelemetry`), disabled by default and toggled per environment.
 - **Java Virtual Threads** — `spring.threads.virtual.enabled: true` for cheaper I/O handling.
 
 ---
@@ -370,9 +374,10 @@ graph TD
 | Schema management | Apache Avro, Confluent Schema Registry |
 | Database | MongoDB (read model) |
 | Architecture | Hexagonal / Ports & Adapters |
-| Serialization | Avro (`kafka-avro-serializer`, `kafka-streams-avro-serde`) |
+| Serialization | Avro (`kafka-avro-serializer`, `kafka-streams-avro-serde`), Confluent Platform 8.2.0 |
 | Testing | JUnit 6.x, Testcontainers 2.x (MongoDB), Spring Embedded Kafka, Awaitility |
-| Observability | Spring Boot Actuator |
+| Observability | Spring Boot Actuator, OpenTelemetry (tracing + metrics via OTLP) |
+| Caching | Caffeine (hotel capacity L1 cache) |
 | Containerization | Docker, Docker Compose |
 | Other | Lombok |
 
